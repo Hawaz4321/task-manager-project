@@ -6,7 +6,7 @@ export default function App() {
   const [tasks, setTasks] = useState([]);
   const [input, setInput] = useState("");
   useEffect(() => {
-    fetch("http://localhost:5000/tasks")
+    fetch("https://task-manager-project-uw4u.onrender.com/tasks")
       .then((res) => res.json())
       .then((data) => setTasks(data));
   }, []);
@@ -14,7 +14,7 @@ export default function App() {
   const addTask = async () => {
     if (!input.trim()) return;
 
-    const res = await fetch("http://localhost:5000/tasks", {
+    const res = await fetch("https://task-manager-project-uw4u.onrender.com/tasks", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -32,7 +32,7 @@ export default function App() {
 
     if (!newTask || newTask.trim() === "") return;
 
-    const res = await fetch(`http://localhost:5000/tasks/${id}`, {
+    const res = await fetch(`https://task-manager-project-uw4u.onrender.com/tasks/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -45,7 +45,7 @@ export default function App() {
 };
   
   const toggleComplete = async (id) => {
-    const res = await fetch(`http://localhost:5000/tasks/${id}`, {
+    const res = await fetch(`https://task-manager-project-uw4u.onrender.com/tasks/${id}`, {
       method: "PATCH",
     });
 
@@ -53,7 +53,7 @@ export default function App() {
     setTasks(data);
   };
   const deleteTask = async (id) => {
-    const res = await fetch(`http://localhost:5000/tasks/${id}`, {
+    const res = await fetch(`https://task-manager-project-uw4u.onrender.com/tasks/${id}`, {
       method: "DELETE",
     });
 
