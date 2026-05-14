@@ -5,15 +5,39 @@ const mongoose = require("mongoose");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors({
-  origin: "*"
-}));
+app.use(cors({ origin: "*" }));
 app.use(express.json());
 
-app.put("/tasks/:id", async (req, res) => {
-  const { task } = req.body;
+// MongoDB connection
+mongoose
+  .connect("mongodb+srv://Hawaz:Pawli4321@cluster0.4dt104y.mongodb.net/taskmanager?retryWrites=true&w=majority")
+  .then(() => console.log("MongoDB Connected"))
+  .catch((err) => console.log(err));
 
-  await Task.findByIdAndUpdate(req.params.id, { task });
+// Schema + Model (MUST be before routes)
+const taskSchema = new mongoose.Schema({
+  task: String,
+  completed: { type: Boolean, default: false },
+});
+
+const Task = mongoose.model("Task", taskSchema);
+
+// Routes
+app.get("/tasks", async (req, res) => {
+  const tasks = await Task.find();
+  res.json(tasks);
+});
+
+app.post("/tasks", async (req, res) => {
+  const newTask = new Task({ task: req.body.task });
+  await newTask.save();
+
+  const tasks = await Task.find();
+  res.json(tasks);
+});
+
+app.put("/tasks/:id", async (req, res) => {
+  await Task.findByIdAndUpdate(req.params.id, { task: req.body.task });
 
   const tasks = await Task.find();
   res.json(tasks);
@@ -21,7 +45,6 @@ app.put("/tasks/:id", async (req, res) => {
 
 app.patch("/tasks/:id", async (req, res) => {
   const task = await Task.findById(req.params.id);
-
   task.completed = !task.completed;
   await task.save();
 
@@ -29,45 +52,6 @@ app.patch("/tasks/:id", async (req, res) => {
   res.json(tasks);
 });
 
-// MongoDB connection
-mongoose
-  .connect(
-    "mongodb+srv://Hawaz:Pawli4321@cluster0.4dt104y.mongodb.net/taskmanager?retryWrites=true&w=majority"
-  )
-  .then(() => console.log("MongoDB Connected"))
-  .catch((err) => console.log(err));
-
-// Schema
-const taskSchema = new mongoose.Schema({
-  task: String,
-  completed: {
-    type: Boolean,
-    default: false,
-  },
-});
-
-// Model
-const Task = mongoose.model("Task", taskSchema);
-
-// Get tasks
-app.get("/tasks", async (req, res) => {
-  const tasks = await Task.find();
-  res.json(tasks);
-});
-
-// Add task
-app.post("/tasks", async (req, res) => {
-  const newTask = new Task({
-    task: req.body.task,
-  });
-
-  await newTask.save();
-
-  const tasks = await Task.find();
-  res.json(tasks);
-});
-
-// Delete task
 app.delete("/tasks/:id", async (req, res) => {
   await Task.findByIdAndDelete(req.params.id);
 
@@ -75,6 +59,6 @@ app.delete("/tasks/:id", async (req, res) => {
   res.json(tasks);
 });
 
-app.listen(process.env.PORT || 5000, () => {
+app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
