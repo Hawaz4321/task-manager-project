@@ -34,7 +34,6 @@ app.patch("/tasks/:id", async (req, res) => {
   }
 });
 
-// MongoDB
 mongoose
   .connect(
     "mongodb+srv://Hawaz:Pawli4321@cluster0.4dt104y.mongodb.net/taskmanager?retryWrites=true&w=majority"
@@ -42,7 +41,6 @@ mongoose
   .then(() => console.log("MongoDB Connected"))
   .catch((err) => console.log(err));
 
-// Schema
 const taskSchema = new mongoose.Schema({
   task: String,
   completed: { type: Boolean, default: false },
@@ -50,13 +48,11 @@ const taskSchema = new mongoose.Schema({
 
 const Task = mongoose.model("Task", taskSchema);
 
-// GET
 app.get("/tasks", async (req, res) => {
   const tasks = await Task.find();
   res.json(tasks);
 });
 
-// POST
 app.post("/tasks", async (req, res) => {
   const newTask = new Task({ task: req.body.task });
   await newTask.save();
@@ -65,7 +61,6 @@ app.post("/tasks", async (req, res) => {
   res.json(tasks);
 });
 
-// DELETE
 app.delete("/tasks/:id", async (req, res) => {
   await Task.findByIdAndDelete(req.params.id);
 
@@ -73,7 +68,6 @@ app.delete("/tasks/:id", async (req, res) => {
   res.json(tasks);
 });
 
-// PUT (edit task)
 app.put("/tasks/:id", async (req, res) => {
   await Task.findByIdAndUpdate(req.params.id, {
     task: req.body.task,
@@ -83,7 +77,6 @@ app.put("/tasks/:id", async (req, res) => {
   res.json(tasks);
 });
 
-// PATCH (toggle complete)
 app.patch("/tasks/:id", async (req, res) => {
   const task = await Task.findById(req.params.id);
   task.completed = !task.completed;
