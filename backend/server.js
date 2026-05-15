@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+app.use(cors({ origin: "*" }));
 app.use(express.json());
 
 mongoose
@@ -17,6 +17,7 @@ mongoose
 
 const taskSchema = new mongoose.Schema({
   task: String,
+  completed: { type: Boolean, default: false },
 });
 
 const Task = mongoose.model("Task", taskSchema);
@@ -27,10 +28,7 @@ app.get("/tasks", async (req, res) => {
 });
 
 app.post("/tasks", async (req, res) => {
-  const newTask = new Task({
-    task: req.body.task,
-  });
-
+  const newTask = new Task({ task: req.body.task });
   await newTask.save();
 
   const tasks = await Task.find();
@@ -39,6 +37,24 @@ app.post("/tasks", async (req, res) => {
 
 app.delete("/tasks/:id", async (req, res) => {
   await Task.findByIdAndDelete(req.params.id);
+
+  const tasks = await Task.find();
+  res.json(tasks);
+});
+
+app.put("/tasks/:id", async (req, res) => {
+  await Task.findByIdAndUpdate(req.params.id, {
+    task: req.body.task,
+  });
+
+  const tasks = await Task.find();
+  res.json(tasks);
+});
+
+app.patch("/tasks/:id", async (req, res) => {
+  const task = await Task.findById(req.params.id);
+  task.completed = !task.completed;
+  await task.save();
 
   const tasks = await Task.find();
   res.json(tasks);

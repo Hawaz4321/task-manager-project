@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const API = "https://task-manager-project-z7lw.onrender.com";
+const API = "https://task-manager-project-uw4u.onrender.com";
 
 export default function App() {
   const [tasks, setTasks] = useState([]);
@@ -17,9 +17,7 @@ export default function App() {
 
     const res = await fetch(`${API}/tasks`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ task: input }),
     });
 
@@ -37,22 +35,61 @@ export default function App() {
     setTasks(data);
   };
 
+  const editTask = async (id, currentTask) => {
+    const newTask = prompt("Edit task:", currentTask);
+    if (!newTask || !newTask.trim()) return;
+
+    const res = await fetch(`${API}/tasks/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ task: newTask }),
+    });
+
+    const data = await res.json();
+    setTasks(data);
+  };
+
+  const toggleComplete = async (id) => {
+    const res = await fetch(`${API}/tasks/${id}`, {
+      method: "PATCH",
+    });
+
+    const data = await res.json();
+    setTasks(data);
+  };
+
   return (
-    <div style={{ padding: "20px", fontFamily: "Arial" }}>
+    <div style={{ padding: 20, fontFamily: "Arial" }}>
       <h1>Task Manager</h1>
 
-      <input
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        placeholder="Enter a task"
-      />
-
-      <button onClick={addTask}>Add</button>
+      <div>
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Enter task"
+        />
+        <button onClick={addTask}>Add</button>
+      </div>
 
       <ul>
         {tasks.map((task) => (
           <li key={task._id}>
-            {task.task}
+            <span
+              style={{
+                textDecoration: task.completed ? "line-through" : "none",
+              }}
+            >
+              {task.task}
+            </span>
+
+            <button onClick={() => toggleComplete(task._id)}>
+              {task.completed ? "Undo" : "Done"}
+            </button>
+
+            <button onClick={() => editTask(task._id, task.task)}>
+              Edit
+            </button>
+
             <button onClick={() => deleteTask(task._id)}>
               Delete
             </button>
