@@ -8,6 +8,32 @@ const PORT = process.env.PORT || 5000;
 app.use(cors({ origin: "*" }));
 app.use(express.json());
 
+app.put("/tasks/:id", async (req, res) => {
+  try {
+    await Task.findByIdAndUpdate(req.params.id, {
+      task: req.body.task,
+    });
+
+    const tasks = await Task.find();
+    res.json(tasks);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.patch("/tasks/:id", async (req, res) => {
+  try {
+    const task = await Task.findById(req.params.id);
+    task.completed = !task.completed;
+    await task.save();
+
+    const tasks = await Task.find();
+    res.json(tasks);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // MongoDB
 mongoose
   .connect(

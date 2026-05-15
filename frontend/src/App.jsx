@@ -28,6 +28,31 @@ export default function App() {
     setInput("");
   };
 
+  const editTask = async (id, currentTask) => {
+    const newTask = prompt("Edit task:", currentTask);
+    if (!newTask || !newTask.trim()) return;
+
+    const res = await fetch(`${API}/tasks/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ task: newTask }),
+    });
+
+    const data = await res.json();
+    setTasks(data);
+  };
+
+  const toggleComplete = async (id) => {
+    const res = await fetch(`${API}/tasks/${id}`, {
+      method: "PATCH",
+    });
+
+    const data = await res.json();
+    setTasks(data);
+  };
+
   const deleteTask = async (id) => {
     const res = await fetch(`${API}/tasks/${id}`, {
       method: "DELETE",
@@ -53,6 +78,14 @@ export default function App() {
         {tasks.map((task) => (
           <li key={task._id}>
             {task.task}
+            <button onClick={() => toggleComplete(task._id)}>
+              {task.completed ? "Undo" : "Done"}
+            </button>
+
+            <button onClick={() => editTask(task._id, task.task)}>
+              Edit
+            </button>
+            
             <button onClick={() => deleteTask(task._id)}>
               Delete
             </button>
